@@ -1,4 +1,5 @@
 const port = 4001;
+const { v4: uuid } = require("uuid");
 const { Server } = require("socket.io");
 const io = new Server(port, {
 	cors: {
@@ -7,6 +8,8 @@ const io = new Server(port, {
 	},
 });
 
+const messages = [];
+
 io.on("connection", (socket) => {
 	socket.emit("connection");
 	console.log(`User with ID: ${socket.id} has connected`);
@@ -14,10 +17,15 @@ io.on("connection", (socket) => {
 		console.log(`User with ID: ${socket.id} has disconnected`);
 	});
 
+	socket.on("choose_username", (data) => {
+		socket.username = data;
+	});
+
 	// create//join room
 	socket.on("join_room", (data) => {
 		socket.join(data);
 		console.log(`User with ID: ${socket.id} joined room: ${data} `);
+		socket.emit("befintligamedelanden", messages);
 	});
 
 	socket.on("send_message", (data) => {
@@ -28,8 +36,14 @@ io.on("connection", (socket) => {
 	socket.emit("user", socket.id);
 
 	// To all clients
-	socket.on("messages", ({ message, user }) => {
+	socket.on("messages", (message) => {
 		// console.log(message);
-		io.emit("messages", { message, user });
+		const newMessage = {
+			message,
+			user: { id: socket.id, username: socket.username },
+			id: uuid(),
+		};
+		io.emit("messages", newMessage);
+		messages.push(newMessage);
 	});
 });
