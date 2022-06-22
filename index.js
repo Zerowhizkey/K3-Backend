@@ -1,5 +1,3 @@
-// const express = require("express");
-// const app = express();
 const port = 4001;
 const { Server } = require("socket.io");
 const io = new Server(port, {
@@ -9,17 +7,21 @@ const io = new Server(port, {
 	},
 });
 
-// app.use(express.json());
-
-// app.get("/", (req, res) => {
-// 	res.send("<h1> Hello World! </h1>");
-// });
-
 io.on("connection", (socket) => {
 	socket.emit("connection");
-	console.log(`Socket with ID: ${socket.id} has connected`);
+	console.log(`User with ID: ${socket.id} has connected`);
 	socket.on("disconnect", () => {
-		console.log(`Socket with ID: ${socket.id} has disconnected`);
+		console.log(`User with ID: ${socket.id} has disconnected`);
+	});
+
+	// create//join room
+	socket.on("join_room", (data) => {
+		socket.join(data);
+		console.log(`User with ID: ${socket.id} joined room: ${data} `);
+	});
+
+	socket.on("send_message", (data) => {
+		socket.to(data.room).emit("receive_message", data);
 	});
 
 	// single client
