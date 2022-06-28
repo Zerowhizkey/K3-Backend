@@ -1,20 +1,19 @@
 const usersModel = require("../models/users.model");
 
-async function createUser(req, res) {
-	if (!res) {
+async function createUser(id, name) {
+	if (!name) {
 		return console.log("You need a username");
 	}
 	try {
-		const result = await usersModel.createUser(req, res);
-		// console.log(result, "Create user result");
+		const result = await usersModel.createUser(id, name);
 		return result;
 	} catch (error) {
 		return console.log("User could not be created");
 	}
 }
 
-async function getUser(req, res) {
-	const result = await usersModel.getUser(req);
+async function getUser(id) {
+	const result = await usersModel.getUser(id);
 	if (!result) {
 		return console.log("No such user");
 	}

@@ -18,8 +18,8 @@ async function getMessages(roomId) {
 
 async function deleteMessages(roomId) {
 	const result = await messageModel.deleteMessages(roomId);
-	if (!result) {
-		return console.log("no messages");
+	if (!roomId) {
+		return console.log("No Id");
 	}
 }
 

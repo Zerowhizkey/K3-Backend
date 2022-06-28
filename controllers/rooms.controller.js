@@ -21,8 +21,8 @@ async function getRoom(id) {
 	return result;
 }
 
-async function getAllRooms(req, res) {
-	const result = await roomsModel.getAllRooms(req);
+async function getAllRooms() {
+	const result = await roomsModel.getAllRooms();
 	if (!result) {
 		return console.log("No rooms");
 	}
@@ -31,9 +31,8 @@ async function getAllRooms(req, res) {
 
 async function deleteRoom(name) {
 	const result = await roomsModel.deleteRoom(name);
-	console.log(result, "haha");
 	if (!result) {
-		return console.log("room does not exist");
+		return console.log("Room does not exist");
 	}
 	return result;
 }
