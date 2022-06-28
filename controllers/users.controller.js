@@ -20,7 +20,16 @@ async function getUser(id) {
 	return result;
 }
 
+async function getAllUser() {
+	const result = await usersModel.getAllUser();
+	if (!result) {
+		return console.log("No users");
+	}
+	return result;
+}
+
 module.exports = {
 	createUser,
 	getUser,
+	getAllUser,
 };

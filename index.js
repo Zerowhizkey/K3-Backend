@@ -9,7 +9,11 @@ const io = new Server(port, {
 const fs = require("fs");
 
 const db = require("./config/db");
-const { createUser, getUser } = require("./controllers/users.controller");
+const {
+	createUser,
+	getUser,
+	getAllUser,
+} = require("./controllers/users.controller");
 const {
 	createRoom,
 	getRoom,
@@ -55,12 +59,13 @@ io.use((socket, next) => {
 // const messages = [];
 
 io.on("connection", async (socket) => {
-	// console.log(`User with ID: ${socket.id} has connected`);
+	console.log(`User with ID: ${socket.id} has connected`);
 	const rooms = await getAllRooms();
-	socket.emit("connection", rooms);
+	const users = await getAllUser();
+	socket.emit("connection", { rooms, users });
 	// console.log(rooms);
 	socket.on("disconnect", () => {
-		// console.log(`User with ID: ${socket.id} has disconnected`);
+		console.log(`User with ID: ${socket.id} has disconnected`);
 	});
 
 	socket.on("choose_username", (name) => {
@@ -68,7 +73,7 @@ io.on("connection", async (socket) => {
 	});
 
 	socket.on("join_room", async (name) => {
-		// const user = await getUser(socket.id);
+		const user = await getUser(socket.id);
 
 		const rooms = await getAllRooms();
 

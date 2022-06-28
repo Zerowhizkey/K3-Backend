@@ -26,7 +26,21 @@ function getUser(id) {
 	});
 }
 
+function getAllUser() {
+	const sql = "SELECT * FROM users";
+	return new Promise((resolve, reject) => {
+		db.all(sql, (error, users) => {
+			if (error) {
+				console.error(error.message);
+				reject(error);
+			}
+			resolve(users);
+		});
+	});
+}
+
 module.exports = {
 	createUser,
 	getUser,
+	getAllUser,
 };
