@@ -1,6 +1,7 @@
 const port = 4001;
-const { v4: uuid } = require("uuid");
+// const { v4: uuid } = require("uuid");
 const { Server } = require("socket.io");
+const { DateTime } = require("luxon");
 const io = new Server(port, {
 	cors: {
 		origin: "*",
@@ -13,13 +14,22 @@ const {
 	createRoom,
 	getRoom,
 	deleteRoom,
+	getAllRooms,
 } = require("./controllers/rooms.controller");
 
-const messages = [];
+const {
+	addMessage,
+	getMessages,
+	deleteMessages,
+} = require("./controllers/messages.controller");
 
-io.on("connection", (socket) => {
-	socket.emit("connection");
+// const messages = [];
+
+io.on("connection", async (socket) => {
 	// console.log(`User with ID: ${socket.id} has connected`);
+	const rooms = await getAllRooms();
+	socket.emit("connection", rooms);
+	// console.log(rooms);
 	socket.on("disconnect", () => {
 		// console.log(`User with ID: ${socket.id} has disconnected`);
 	});
@@ -28,23 +38,43 @@ io.on("connection", (socket) => {
 		const newUser = createUser(socket.id, name);
 	});
 
-	// create//join room
 	socket.on("join_room", async (name) => {
-		// const newUser = createUser(socket.id, name);
 		const user = await getUser(socket.id);
 		const newRoom = await createRoom(socket.id, name);
-		const room = await getRoom(socket.id);
-		socket.join(newRoom);
-		console.log(`User with ID: ${user.id} joined room: ${room.name} `);
-		socket.emit("befintligamedelanden", messages);
+
+		const rooms = await getAllRooms();
+		socket.join(name);
+		// console.log(socket.rooms);
+		const room = Array.from(socket.rooms);
+		if (room.length === 3) {
+			const leaveRoom = room[1];
+			socket.leave(leaveRoom);
+		}
+
+		console.log(newRoom);
+		console.log(`User with ID: ${user.id} joined room: ${name}`);
+		console.log(socket.rooms);
+		// socket.emit("befintligamedelanden", messages);
+		io.emit("update_room", rooms);
 	});
 
-	socket.on("existingRoom", async (name) => {
-		const room = await getRoom(socket.id, name);
-	});
+	// socket.on("existingRooms", async () => {
+	// 	const rooms = await getAllRooms();
+	// 	socket.emit("rooms", rooms);
+	// });
 
-	socket.on("send_message", (data) => {
-		socket.to(data.room).emit("receive_message", data);
+	socket.on("message", async (data) => {
+		const date = DateTime.now().toLocaleString(DateTime.DATETIME_MED);
+		const newMessage = {
+			user_id: socket.id,
+			msg: data.msg,
+			room_id: data.roomName,
+			user_name: data.username,
+			date: date,
+		};
+		addMessage(newMessage);
+		const roomMessages = await getMessages(data.roomName);
+		io.to(data.roomName).emit("sent_message", roomMessages);
 	});
 
 	// single client
@@ -54,15 +84,15 @@ io.on("connection", (socket) => {
 	});
 
 	// To all clients
-	socket.on("messages", async (message) => {
-		// console.log(message);
-		const user = await getUser(socket.id);
-		const newMessage = {
-			message,
-			user,
-			id: uuid(),
-		};
-		io.emit("messages", newMessage);
-		messages.push(newMessage);
-	});
+	// socket.on("messages", async (message) => {
+	// 	// console.log(message);
+	// 	const user = await getUser(socket.id);
+	// 	const newMessage = {
+	// 		message,
+	// 		user,
+	// 		id: uuid(),
+	// 	};
+	// 	io.emit("messages", newMessage);
+	// 	messages.push(newMessage);
+	// });
 });

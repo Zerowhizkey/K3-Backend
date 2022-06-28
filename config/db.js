@@ -17,10 +17,12 @@ CREATE TABLE IF NOT EXISTS users
 const messagestmt = `
 CREATE TABLE IF NOT EXISTS messages 
 (
-    id TEXT PRIMARY KEY,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
      msg TEXT NOT NULL,
       room_id TEXT,
         user_id TEXT,
+		user_name TEXT,
+		date TEXT,
          CONSTRAINT fk_room_id FOREIGN KEY(room_id) REFERENCES rooms(id) ON DELETE CASCADE,
           CONSTRAINT fk_user_id FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
           )`;

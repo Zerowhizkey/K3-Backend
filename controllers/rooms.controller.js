@@ -21,6 +21,14 @@ async function getRoom(req, res) {
 	return result;
 }
 
+async function getAllRooms(req, res) {
+	const result = await roomsModel.getAllRooms(req);
+	if (!result) {
+		return console.log("No rooms");
+	}
+	return result;
+}
+
 async function deleteRoom(req, res) {
 	const result = await roomsModel.deleteRoom(req);
 	if (!result) {
@@ -33,4 +41,5 @@ module.exports = {
 	createRoom,
 	getRoom,
 	deleteRoom,
+	getAllRooms,
 };
