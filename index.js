@@ -1,13 +1,13 @@
 const port = 4001;
-// const { v4: uuid } = require("uuid");
 const { Server } = require("socket.io");
-const { DateTime } = require("luxon");
 const io = new Server(port, {
 	cors: {
 		origin: "*",
 		methods: ["GET", "POST"],
 	},
 });
+const fs = require("fs");
+
 const db = require("./config/db");
 const { createUser, getUser } = require("./controllers/users.controller");
 const {
@@ -22,6 +22,36 @@ const {
 	getMessages,
 	deleteMessages,
 } = require("./controllers/messages.controller");
+
+function messageLog(data) {
+	console.log(data);
+	const fsData = JSON.stringify(data);
+	if (data.msg) {
+		fs.appendFile("message_log.txt", fsData + "\n", (error) => {
+			if (error) {
+				return console.log("Error writing to message_log.txt");
+			} else {
+				return console.log(
+					"Attemp to store data in message_log.txt was successful"
+				);
+			}
+		});
+	}
+}
+io.use((socket, next) => {
+	socket.on("message", (data) => {
+		console.log(data);
+		const newMessage = {
+			user_id: socket.id,
+			msg: data.msg,
+			room_id: data.roomName,
+			user_name: data.username,
+			date: Date.now(),
+		};
+		messageLog(newMessage);
+	});
+	next();
+});
 
 // const messages = [];
 
@@ -40,7 +70,7 @@ io.on("connection", async (socket) => {
 
 	socket.on("join_room", async (name) => {
 		const user = await getUser(socket.id);
-		const newRoom = await createRoom(socket.id, name);
+		const newRoom = await createRoom(name);
 
 		const rooms = await getAllRooms();
 		socket.join(name);
@@ -50,12 +80,21 @@ io.on("connection", async (socket) => {
 			const leaveRoom = room[1];
 			socket.leave(leaveRoom);
 		}
+		const roomMessages = await getMessages(name);
+		io.to(name).emit("sent_message", roomMessages);
 
 		console.log(newRoom);
-		console.log(`User with ID: ${user.id} joined room: ${name}`);
+		console.log(`User with ID: ${user?.id} joined room: ${name}`);
 		console.log(socket.rooms);
 		// socket.emit("befintligamedelanden", messages);
 		io.emit("update_room", rooms);
+	});
+
+	socket.on("delete_room", async (roomName) => {
+		await deleteRoom(roomName);
+		await deleteMessages(roomName);
+		const updatedRooms = await getAllRooms();
+		io.emit("deleted_room", updatedRooms);
 	});
 
 	// socket.on("existingRooms", async () => {
@@ -64,13 +103,17 @@ io.on("connection", async (socket) => {
 	// });
 
 	socket.on("message", async (data) => {
-		const date = DateTime.now().toLocaleString(DateTime.DATETIME_MED);
+		if (!data.msg.length) {
+			return;
+		}
+
+		// const date = DateTime.now().toLocaleString(DateTime.DATETIME_MED);
 		const newMessage = {
 			user_id: socket.id,
 			msg: data.msg,
 			room_id: data.roomName,
 			user_name: data.username,
-			date: date,
+			date: Date.now(),
 		};
 		addMessage(newMessage);
 		const roomMessages = await getMessages(data.roomName);

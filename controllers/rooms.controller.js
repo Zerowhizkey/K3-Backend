@@ -1,20 +1,20 @@
 const roomsModel = require("../models/rooms.model");
 
-async function createRoom(req, res) {
-	if (!res) {
-		return console.log("Le room need Le name");
+async function createRoom(name) {
+	if (!name) {
+		return console.log("You need a room name!");
 	}
 	try {
-		const result = await roomsModel.createRoom(req, res);
-		// console.log(result, "Create room result");
+		const result = await roomsModel.createRoom(name);
+
 		return result;
 	} catch (error) {
-		return console.log("room could not be created");
+		return console.log("The room already exists");
 	}
 }
 
-async function getRoom(req, res) {
-	const result = await roomsModel.getRoom(req);
+async function getRoom(id) {
+	const result = await roomsModel.getRoom(id);
 	if (!result) {
 		return console.log("No such room");
 	}
@@ -29,8 +29,9 @@ async function getAllRooms(req, res) {
 	return result;
 }
 
-async function deleteRoom(req, res) {
-	const result = await roomsModel.deleteRoom(req);
+async function deleteRoom(name) {
+	const result = await roomsModel.deleteRoom(name);
+	console.log(result, "haha");
 	if (!result) {
 		return console.log("room does not exist");
 	}

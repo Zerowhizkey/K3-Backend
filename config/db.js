@@ -3,7 +3,7 @@ const sqlite = require("sqlite3").verbose();
 const roomStmt = `
 CREATE TABLE IF NOT EXISTS rooms
  (
-    id TEXT PRIMARY KEY,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
      name TEXT UNIQUE
      )`;
 
@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS messages
       room_id TEXT,
         user_id TEXT,
 		user_name TEXT,
-		date TEXT,
+		date INTEGER,
          CONSTRAINT fk_room_id FOREIGN KEY(room_id) REFERENCES rooms(id) ON DELETE CASCADE,
           CONSTRAINT fk_user_id FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
           )`;

@@ -1,9 +1,9 @@
 const db = require("../config/db");
 
-function createRoom(id, name) {
-	const sql = "INSERT INTO rooms (id, name) VALUES (?, ?)";
+function createRoom(name) {
+	const sql = "INSERT INTO rooms (name) VALUES (?)";
 	return new Promise((resolve, reject) => {
-		db.run(sql, [id, name], function (error, room) {
+		db.run(sql, [name], function (error, room) {
 			if (error) {
 				console.error(error.message);
 				reject(error);
@@ -39,15 +39,15 @@ function getAllRooms() {
 	});
 }
 
-function deleteRoom(id) {
-	const sql = "DELETE FROM rooms WHERE id = ?";
+function deleteRoom(name) {
+	const sql = "DELETE FROM rooms WHERE name = ?";
 	return new Promise((resolve, reject) => {
-		db.run(sql, id, (error) => {
+		db.run(sql, name, (error) => {
 			if (error) {
 				console.error(error.message);
 				reject(error);
 			}
-			resolve(id);
+			resolve(name);
 		});
 	});
 }
