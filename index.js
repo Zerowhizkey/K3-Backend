@@ -13,6 +13,7 @@ const {
 	createUser,
 	getUser,
 	getAllUser,
+	deleteUser,
 } = require("./controllers/users.controller");
 const {
 	createRoom,
@@ -63,17 +64,18 @@ io.on("connection", async (socket) => {
 	const rooms = await getAllRooms();
 	const users = await getAllUser();
 	socket.emit("connection", { rooms, users });
-	// console.log(rooms);
 	socket.on("disconnect", () => {
 		console.log(`User with ID: ${socket.id} has disconnected`);
 	});
 
-	socket.on("choose_username", (name) => {
-		const newUser = createUser(socket.id, name);
+	socket.on("choose_username", async (name) => {
+		await createUser(socket.id, name);
+		const users = await getAllUser();
+		io.emit("get_users", users);
 	});
 
 	socket.on("join_room", async (name) => {
-		const user = await getUser(socket.id);
+		// const user = await getUser(socket.id);
 
 		const rooms = await getAllRooms();
 
@@ -103,6 +105,14 @@ io.on("connection", async (socket) => {
 		await deleteMessages(roomName);
 		const updatedRooms = await getAllRooms();
 		io.emit("deleted_room", updatedRooms);
+	});
+
+	socket.on("delete_user", async (userName) => {
+		await deleteUser(userName);
+		// await deleteMessages(roomName);
+		const updatedUser = await getAllUser();
+		console.log(updatedUser, "asdasd");
+		io.emit("get_users", updatedUser);
 	});
 
 	socket.on("message", async (data) => {

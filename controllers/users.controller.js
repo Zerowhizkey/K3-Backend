@@ -28,8 +28,17 @@ async function getAllUser() {
 	return result;
 }
 
+async function deleteUser(name) {
+	const result = await usersModel.deleteUser(name);
+	// if (!result) {
+	// 	return console.log("No users");
+	// }
+	// return result;
+}
+
 module.exports = {
 	createUser,
 	getUser,
 	getAllUser,
+	deleteUser,
 };

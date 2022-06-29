@@ -39,8 +39,22 @@ function getAllUser() {
 	});
 }
 
+function deleteUser(name) {
+	const sql = "DELETE FROM users WHERE name = ?";
+	return new Promise((resolve, reject) => {
+		db.run(sql, name, (error) => {
+			if (error) {
+				console.error(error.message);
+				reject(error);
+			}
+			resolve();
+		});
+	});
+}
+
 module.exports = {
 	createUser,
 	getUser,
 	getAllUser,
+	deleteUser,
 };
